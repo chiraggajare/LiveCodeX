@@ -1,0 +1,28 @@
+{
+  "name": "realtimecode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node backend/index.js",
+    "build": "npm install && cd frontend && npm install && npm run build",
+    "dev": "nodemon backend/index.js"
+  },
+  "keywords": [],
+  "author": "",
+
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "create": "^0.5.5",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.1",
+    "vite": "^7.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
