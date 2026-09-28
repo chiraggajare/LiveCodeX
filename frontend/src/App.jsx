@@ -1,189 +1,60 @@
-import { useState } from "react";
-import { io } from "socket.io-client";
-import './App.css'
-import Editor from "@monaco-editor/react"
-import { useEffect } from "react";
-const socket = io("http://localhost:4500");
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_BASE } from "./config.js";
+import "./App.css";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import EditorPage from "./pages/EditorPage";
+import Dashboard from "./pages/Dashboard";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
-
-  const [joined, setJoined] = useState(false)
-  const [roomId, setRoomId] = useState("")
-  const [userName, setUserName] = useState("")
-  const [language, setLanguage] = useState("javascript")
-  const [code, setCode] = useState("// Start coding!!")
-  const [copySuccess, setCopySuccess] = useState("")
-  const [users, setUsers] = useState([])
-  const [typing, setTyping] = useState("")
-  const [outPut, setOutPut] = useState("")
-  const [version, setVersion] = useState("*")
-
-
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on("userJoined", (users) => {
-      setUsers(users)
-    })
-
-    socket.on('codeUpdate', (newCode) => {
-      setCode(newCode)
-    })
-
-    socket.on('userTyping', (user) => {
-      setTyping(`${user.slice(0.8)}... is typing`)
-      setTimeout(() => setTyping(""), 2000)
-    })
-
-    socket.on('languageUpdate', (newLanguage) => {
-      setLanguage(newLanguage)
-    })
-
-    socket.on('codeResponse', (response) => {
-      setOutPut(response.run.output)
-    })
-
-
-
-
-    return () => {
-      socket.off("userJoined")
-      socket.off('codeUpdate')
-      socket.off('userTyping')
-      socket.off('languageUpdate')
-      socket.off('codeResponse')
-    }
-  }, [])
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      socket.emit('leaveRoom')
-    }
+    axios.get(`${API_BASE}/api/me`, { withCredentials: true })
+      .then(res => {
+        if (res.data.authenticated) setUser(res.data.user);
+        else setUser(null);
+      })
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, []);
 
-    window.addEventListener('beforeunload', handleBeforeUnload)
+  const logout = async () => {
+    await axios.post(`${API_BASE}/api/logout`, {}, { withCredentials: true });
+    setUser(null);
+    navigate("/home");
+  };
 
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
-  }, [])
+  const toggleTheme = () => setTheme(t => t === "light" ? "dark" : "light");
 
-  function copyRoomId() {
-    navigator.clipboard.writeText(roomId)
-    setCopySuccess("Copied!!")
-    setTimeout(() => setCopySuccess(""), 2000)
-  }
-
-  function leaveRoom() {
-    socket.emit('leaveRoom')
-    setJoined(false)
-    setRoomId("")
-    setCode("// Start coding!!")
-    setUserName("")
-    setLanguage("javascript")
-  }
-
-  function joinRoom() {
-    //console.log(roomId,userName)
-    if (roomId && userName) {
-      socket.emit("join", { roomId, userName })
-      setJoined(true);
-    }
-  }
-
-  function handleCodeChange(newCode) {
-    setCode(newCode)
-    socket.emit('codeChange', { roomId, code: newCode })
-    socket.emit('typing', { roomId, userName })
-
-  }
-
-  function handleLanguageChange(e) {
-    const newLanguage = e.target.value
-    setLanguage(newLanguage)
-    socket.emit('languageChange', { roomId, language: newLanguage })
-  }
-
-
-
-  function runCode() {
-    socket.emit('compileCode', { code, roomId, language, version })
-  }
-
-
-
-  if (!joined) {
-    return (
-      <div className="join-container">
-        <div className="join-form">
-          <h1>Join Code Room</h1>
-          <input
-            type="text"
-            placeholder="Room Id"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)} />
-
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)} />
-
-          <button onClick={joinRoom} className="btn btn-primary">Join Room</button>
-
-
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "var(--c-bg)" }}>
+      <span style={{ color: "var(--c-text2)", fontSize: "0.9rem" }}>Loading...</span>
+    </div>
+  );
 
   return (
-    <div className="editor-container">
-      <div className="sidebar">
-        <div className="room-info">
-          <h2>Code Room: {roomId} </h2>
-          <button className="copy-button" onClick={copyRoomId} >Copy ID</button>
-          {copySuccess && <span className="copy-success">{copySuccess}</span>}
-        </div>
-        <h3>Users in the room: </h3>
-        <ul>
-          {
-            users.map((users, index) => (
-              <li key={index}>{users.slice(0.8)}</li>
-            ))}
-
-        </ul>
-        <p className="typing-indicator">{typing}</p>
-        <select className="language-selector" value={language} onChange={handleLanguageChange}>
-          <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-        </select>
-
-        <button className="leave-button" onClick={leaveRoom}> Leave Room</button>
-      </div>
-      <div className="editor-wrapper">
-
-        <Editor
-          height={"60%"}
-          defaultLanguage={language}
-          language={language}
-          value={code}
-          onChange={handleCodeChange}
-          theme="vs-dark"
-          options={
-            {
-              minimap: { enabled: false },
-              fontSize: 14
-            }
-          }
-        />
-        <button className="run-btn" onClick={runCode}>Execute</button>
-        <textarea name="output-console" value={outPut} readOnly placeholder="Output will appear here..."></textarea>
-      </div>
-    </div>
-  )
-
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/home" />} />
+      <Route path="/home" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
+      <Route path="/dashboard" element={user ? <Dashboard user={user} logout={logout} theme={theme} toggleTheme={toggleTheme} /> : <Navigate to="/home" />} />
+      <Route path="/room/:roomId" element={user ? <EditorPage user={user} theme={theme} toggleTheme={toggleTheme} /> : <Navigate to="/login" />} />
+      <Route path="/login" element={!user ? <Login setUser={setUser} theme={theme} toggleTheme={toggleTheme} /> : <Navigate to="/dashboard" />} />
+      <Route path="/register" element={!user ? <Register setUser={setUser} theme={theme} toggleTheme={toggleTheme} /> : <Navigate to="/dashboard" />} />
+    </Routes>
+  );
 }
 
 export default App;
-
