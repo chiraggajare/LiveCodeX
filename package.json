@@ -9,7 +9,7 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+    "install:all": "cd backend && npm install && cd ../frontend && npm install --include=dev"
   },
   "keywords": ["collaborative", "code-editor", "realtime", "websocket"],
   "author": "Chirag Gajare",
