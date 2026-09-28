@@ -1354,3 +1354,125 @@ button { font-family: inherit; cursor: pointer; border: none; }
   -webkit-text-fill-color: transparent;
   text-shadow: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* -- Auth Pages -- */
+  .auth-card {
+    padding: 30px 20px;
+    margin: 16px;
+    max-width: 100%;
+  }
+
+  /* -- Dashboard -- */
+  .dash-nav {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    height: auto;
+    gap: 12px;
+  }
+  .dash-nav-right {
+    margin-left: auto;
+  }
+  .dash-left {
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .dash-right {
+    width: 100%;
+  }
+  .dash-tab-content {
+    flex-direction: column;
+    padding: 16px;
+  }
+  .workspace-layout {
+    flex-direction: column !important;
+    padding: 16px !important;
+    gap: 24px;
+  }
+  .workspace-sidebar {
+    width: 100% !important;
+  }
+  .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+  .quick-lang-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* -- Editor Page -- */
+  .editor-navbar {
+    height: auto !important;
+    min-height: 50px;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
+  }
+  .editor-nav-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .editor-nav-center {
+    width: 100%;
+    order: 3;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .editor-nav-center button {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+  .editor-nav-right {
+    order: 2;
+    margin-left: auto;
+  }
+  
+  .editor-body {
+    flex-direction: column !important;
+  }
+  .left-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 250px;
+    border-right: none !important;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .editor-split {
+    width: 100% !important;
+    height: 60vh !important;
+    flex: none !important;
+  }
+  
+  /* If HTML preview is visible */
+  .preview-drag-handle {
+    width: 100% !important;
+    height: 12px !important;
+    border-left: none !important;
+    border-top: 1px solid var(--c-border);
+    cursor: ns-resize !important;
+  }
+  .preview-drag-dots {
+    width: 32px !important;
+    height: 4px !important;
+  }
+  .preview-panel {
+    width: 100% !important;
+    height: 50vh !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-layout {
+    height: 100%;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  .editor-body {
+    overflow-y: auto !important;
+    height: auto;
+    flex: none;
+  }
+}
